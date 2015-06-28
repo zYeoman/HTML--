@@ -1,11 +1,11 @@
 #!/usr/bin/env python
-# -*- coding=utf-8 -*-
+# -*- coding=cp936 -*-
 
 """
 html get name,id and phone
 use module re to find phone number and Id number
 file name such as "xxx-----3702...902.html"
-@auther: zhuangyw
+@author: Yeoman
 """
 
 import os
@@ -120,9 +120,9 @@ result.write('姓名,身份证,电话,城市\n')
 curNum = 0
 findNum = 0
 failNum = 0
-jiheNum = 0
-weitiqu = 0
-fenleijieguo = 0
+totalNum = 0
+noInfoNum = 0
+resultNum = 0
 sumNum = len(curFile)
 try:
     os.mkdir('未提取')
@@ -137,7 +137,7 @@ try:
 except:
     pass
 for files in curFile:
-    curNum = curNum + 1
+    curNum += 1
     print str(curNum) + '/' + str(sumNum) + '\r',
     flag = 0
     contains = (files.find('.htm') >= 0)  # and(files.find('-') >= 0)
@@ -145,10 +145,11 @@ for files in curFile:
         i = 0
         tempFile = os.path.split(files)[1]
         while (not(tempFile[i] in nu)) and (tempFile[i] != '.'):
-            i = i + 1
+            i += 1
         Id = re.search(r'\d{17}[\dX]', tempFile)
         File = open(files)
         lines = File.readlines()
+        phone = ''
         if len(lines) > 394:
             if flag == 0:
                 m = re.search(r'>1\d{10}<', lines[245])
@@ -189,7 +190,7 @@ for files in curFile:
                     result.write(",")
                 result.write(phone + ",")
                 result.write(city + "\n")
-                findNum = findNum + 1
+                findNum += 1
                 try:
                     os.mkdir(dstPath + os.sep + city)
                 except:
@@ -198,31 +199,31 @@ for files in curFile:
                     shutil.copy(files, dstPath + os.sep + city)
                 except:
                     # os.remove(files)
-                    failNum = failNum + 1
-                    fenleijieguo = fenleijieguo + 1
+                    failNum += 1
+                    resultNum += 1
         File.close()
         if flag == 0:
             try:
                 shutil.copy(files, '未提取')
             except:
                 # os.remove(files)
-                failNum = failNum + 1
-                weitiqu = weitiqu + 1
+                failNum += 1
+                noInfoNum += 1
         try:
             shutil.move(files, '集合')
         except:
-            pass
-            failNum = failNum + 1
-            jiheNum = jiheNum + 1
+            os.remove(files)
+            failNum += 1
+            totalNum += 1
 
 result.close()
 
 print '搜索完毕！'
 print '共' + str(sumNum) + '个html文件，成功提取' + str(curNum) + '个文件'
 print '共有' + str(failNum) + '个文件重复，移动失败'
-print '其中' + str(fenleijieguo) + '个文件在分类结果中重复',
-print str(weitiqu) + '个文件在未提取中重复',
-print str(jiheNum) + '个文件在集合中重复'
+print '其中' + str(resultNum) + '个文件在分类结果中重复',
+print str(noInfoNum) + '个文件在未提取中重复',
+print str(totalNum) + '个文件在集合中重复'
 
 
 def delete_gap_dir(di):
