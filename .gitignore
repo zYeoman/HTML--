@@ -7,6 +7,9 @@ test*
 
 result.txt
 
+*.docx
+*.doc
+*.pdf
 *.html
 *.htm
 
