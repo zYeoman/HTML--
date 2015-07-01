@@ -13,6 +13,7 @@ import os
 import re
 import sys
 import shutil
+import pyExcelerator
 
 city_name = sys.argv[1:]
 if len(city_name) > 1:
@@ -116,9 +117,18 @@ for allFile in os.walk(curPath):
                     curFile.append(allFile[0] + os.sep + fileName)
 # curFile = os.listdir(curPath)
 result = open('result.txt', 'w')
+
+xlsResult = pyExcelerator.Workbook()
+xlsResultSheet = xlsResult.add_sheet(u'征信记录')
+
+
 result.write('姓名,身份证,电话,城市\n')
+xlsResultSheet.write(0, 0, u'姓名')
+xlsResultSheet.write(0, 1, u'身份证')
+xlsResultSheet.write(0, 2, u'电话')
+xlsResultSheet.write(0, 3, u'城市')
 curNum = 0
-findNum = 0
+findNum = 1
 failNum = 0
 totalNum = 0
 noInfoNum = 0
@@ -156,7 +166,17 @@ for files in curFile:
                 if m:
                     flag = 1
                     phone = m.group(0)[1:-1]
-            if flag == 0:
+            if flag == 1:
+                for line in lines[270], lines[273], lines[378], lines[393]:
+                    for c in city_name:
+                        if c in line:
+                            if flag == 1:
+                                city = c
+                                flag = 2
+                                break
+                    if flag == 2:
+                        break
+            if flag != 2:
                 for line in lines:
                     m = re.search(r'>1\d{10}<', line)
                     if m:
@@ -172,24 +192,20 @@ for files in curFile:
                             break
                     if flag == 2:
                         break
-            else:
-                for line in lines[270], lines[273], lines[378], lines[393]:
-                    for c in city_name:
-                        if c in line:
-                            if flag == 1:
-                                city = c
-                                flag = 2
-                                break
-                    if flag == 2:
-                        break
             if flag == 2:
                 result.write(tempFile[:i] + ",")
                 if Id:
                     result.write(Id.group(0) + ",")
+                    xlsResultSheet.write(findNum, 1, Id.group(0))
                 else:
                     result.write(",")
                 result.write(phone + ",")
                 result.write(city + "\n")
+                xlsResultSheet.write(
+                    findNum, 0, tempFile[:i].decode('gbk'))
+                xlsResultSheet.write(findNum, 2, phone)
+                xlsResultSheet.write(
+                    findNum, 3, city.decode('gbk'))
                 findNum += 1
                 try:
                     os.mkdir(dstPath + os.sep + city)
@@ -217,6 +233,7 @@ for files in curFile:
             totalNum += 1
 
 result.close()
+xlsResult.save('result.xls')
 
 print '搜索完毕！'
 print '共' + str(sumNum) + '个html文件，成功提取' + str(curNum) + '个文件'
