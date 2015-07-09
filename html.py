@@ -15,6 +15,8 @@ import sys
 import shutil
 import pyExcelerator
 
+version = 5
+
 city_name = sys.argv[1:]
 if len(city_name) > 1:
     pass
