@@ -18,9 +18,7 @@ import pyExcelerator
 version = 5
 
 city_name = sys.argv[1:]
-if len(city_name) > 1:
-    pass
-else:
+if len(city_name) == 0:
     city_name = ['北京市', '上海市', '天津市', '重庆市', '石家庄市', '太原市', '呼和浩特市',
                  '唐山市', '大同市', '包头市', '秦皇岛市', '阳泉市', '乌海市', '邯郸市',
                  '长治市', '赤峰市', '邢台市', '晋城市', '呼伦贝尔市', '保定市', '朔州市',
@@ -113,10 +111,8 @@ curPath = os.getcwd()
 dstPath = curPath + os.sep + '分类结果'
 for allFile in os.walk(curPath):
     for fileName in allFile[2]:
-        if '分类结果' not in allFile[0]:
-            if '未提取' not in allFile[0]:
-                if '集合' not in allFile[0]:
-                    curFile.append(allFile[0] + os.sep + fileName)
+        if '分类结果' not in allFile[0] and '未提取' not in allFile[0] and'集合' not in allFile[0]:
+            curFile.append(allFile[0] + os.sep + fileName)
 # curFile = os.listdir(curPath)
 result = open('result.txt', 'w')
 
@@ -150,13 +146,13 @@ except:
     pass
 for files in curFile:
     curNum += 1
-    print str(curNum) + '/' + str(sumNum) + '\r',
+    print(str(curNum) + '/' + str(sumNum) + '\r'),
     flag = 0
     contains = (files.find('.htm') >= 0)  # and(files.find('-') >= 0)
     if contains:
         i = 0
         tempFile = os.path.split(files)[1]
-        while (not(tempFile[i] in nu)) and (tempFile[i] != '.'):
+        while (tempFile[i] not in nu) and (tempFile[i] != '.'):
             i += 1
         Id = re.search(r'\d{17}[\dX]', tempFile)
         File = open(files)
@@ -171,11 +167,10 @@ for files in curFile:
             if flag == 1:
                 for line in lines[270], lines[273], lines[378], lines[393]:
                     for c in city_name:
-                        if c in line:
-                            if flag == 1:
-                                city = c
-                                flag = 2
-                                break
+                        if c in line and flag == 1:
+                            city = c
+                            flag = 2
+                            break
                     if flag == 2:
                         break
             if flag != 2:
@@ -237,12 +232,12 @@ for files in curFile:
 result.close()
 xlsResult.save('result.xls')
 
-print '搜索完毕！'
-print '共' + str(sumNum) + '个html文件，成功提取' + str(curNum) + '个文件'
-print '共有' + str(failNum) + '个文件重复，移动失败'
-print '其中' + str(resultNum) + '个文件在分类结果中重复',
-print str(noInfoNum) + '个文件在未提取中重复',
-print str(totalNum) + '个文件在集合中重复'
+print('搜索完毕！')
+print('共' + str(sumNum) + '个html文件，成功提取' + str(curNum) + '个文件')
+print('共有' + str(failNum) + '个文件重复，移动失败')
+print('其中' + str(resultNum) + '个文件在分类结果中重复'),
+print(str(noInfoNum) + '个文件在未提取中重复'),
+print(str(totalNum) + '个文件在集合中重复')
 
 
 def delete_gap_dir(di):
@@ -253,7 +248,7 @@ def delete_gap_dir(di):
         if not os.listdir(di):
             os.rmdir(di)
             print('移除空目录: ' + di)
-print '按任意键继续移除空目录'
+print('按任意键继续移除空目录')
 os.system('pause')
 
 delete_gap_dir(curPath)
