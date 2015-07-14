@@ -9,6 +9,8 @@
 from win32com.client import DispatchEx
 # from win32com.client import Dispatch
 from time import sleep
+from uuid import getnode
+import sys
 
 
 class IECom():
@@ -40,6 +42,10 @@ class IECom():
         '''
         open IE
         '''
+        print(u'打开登陆账号文件和信息文件')
+        self.result = open(self.result_file)
+        self.usr = open(self.usr_file)
+        print(u'绑定IE')
         self.__ie = DispatchEx('InternetExplorer.Application')
         self.__ie.visible = 1
         self.__ie.navigate(self.url)
@@ -50,9 +56,11 @@ class IECom():
         '''
         login success return 1
         '''
+        print('Login:' + usr_name)
         self.__ie.navigate(self.url)
         self.wait()
         self.reset_flag()
+        print(u'输入账户密码')
         self.document.getElementsByTagName('input')[0].value = usr_name
         self.document.getElementsByTagName('input')[1].value = usr_pwd
         while(self.identify() == ''):
@@ -62,10 +70,12 @@ class IECom():
         self.wait()
         flag = self.get_flag()
         if flag == 't':
+            print(u'登陆成功！')
             sleep(2)
             self.__ie.navigate(self.fast_url)
             self.wait()
             self.document.getElementById('FastRecommend').click()
+            print(u'开始快速推荐')
             self.wait()
             return 1
         else:
@@ -75,6 +85,7 @@ class IECom():
             return 0
 
     def identify(self):
+        print(u'获得验证码')
         return self.document.getElementById('ValidateValue').value
 
     def reset_flag(self):
@@ -96,35 +107,46 @@ class IECom():
         self.__ie.Visible = 1 - self.__ie.Visible
 
     def wait(self):
+        print(u'等待中')
         while self.__ie.Busy or self.__ie.ReadyState != 4:
             sleep(1)
 
     def quit(self):
+        print(u'退出')
         self.__ie.quit()
 
     def auto(self):
-        result = open(self.result_file)
-        usr = open(self.usr_file)
-        result_info = result.readlines()
-        usr_info = usr.readlines()
+        result_info = self.result.readlines()
+        usr_info = self.usr.readlines()
         while usr_info:
             usr_name, usr_pwd = usr_info.pop().split(',')
             if self.login(usr_name, usr_pwd) == 0:
                 continue
             while result_info:
-                info_name, info_id, info_phone, info_city = result_info.pop().split(
-                    ',')
-                if info_city in city_name:
+                line = result_info.pop()
+                print(u'录入' + line[:-1].decode('gbk'))
+                info_name, info_id, info_phone, info_city = line.split(',')
+                info_name = info_name.decode('gbk')
+                info_city = info_city[:-1].decode('gbk')
+                # if info_city in self.city_name:
+                if True:
                     if self.input(info_name, info_id, info_phone):
+                        result_info.append(line)
                         break
-                else:
-                    break
             else:
                 break
-        result.close()
-        usr.close()
+        print(u'录入完成')
+        self.result.close()
+        self.usr.close()
+        if(len(result_info) > 0):
+            print(u'账号已用完，未录入信息在result.txt中')
+            result = open(self.result_file, 'w')
+            for line in result_info:
+                result.write(line)
+            result.close()
 
     def input(self, info_name, info_id, info_phone):
+        print(u'输入信息')
         tmp_doc = self.document.getElementById(
             'BusinessShowDiv').contentWindow.document
         tmp_doc.getElementById('txtIDCardNO').value = info_id
@@ -135,11 +157,35 @@ class IECom():
         sleep(1)
         tmp = tmp_doc.getElementById(
             'DataNotFound').getElementsByTagName('p')
-        tmp_button = tmp_doc.getElementsByTagName('button')
+        while tmp.length == 0:
+            tmp = tmp_doc.getElementById(
+                'DataNotFound').getElementsByTagName('p')
         if tmp.length > 0:
             tmp = tmp[0].innerHTML
+            if u'该客户可提交贷款' in tmp:
+                print(u'可提交贷款')
+                tmp_button = tmp_doc.getElementsByTagName('button')
+                tmp_button[0].click()
+                sleep(10)
+                tmp_button = tmp_doc.getElementsByTagName('button')
+                while tmp_button.length != 2:
+                    tmp_button = tmp_doc.getElementsByTagName('button')
+                tmp_button[0].click()
+                self.wait()
+                if tmp_doc.getElementsByTagName('button').length > 0:
+                    tmp_doc.getElementsByTagName('button')[0].click()
+                sleep(10)
+                while not tmp_doc.getElementById('btnContinuance'):
+                    pass
+                tmp_doc.getElementById('btnContinuance').click()
+                self.wait()
+                return 0
             if u'上限' in tmp:
+                print(u'推荐数量达到上限')
                 return 1
+        tmp_button = tmp_doc.getElementsByTagName('button')
+        while tmp_button.length == 0:
+            tmp_button = tmp_doc.getElementsByTagName('button')
         tmp_button[0].click()
         return 0
 
@@ -164,13 +210,28 @@ class IECom():
     def set_node(self, node, val):
         node.innerHTML = val
 
-try:
-    test = IECom()
-    test.auto()
-except Exception, e:
-    test.quit()
-    print 'err:', e
-    pass
+code = getnode()
+code_license = code % 3721 + code * 9997 % 997
+
+if len(sys.argv) > 1:
+    if sys.argv[1] == 'getnode':
+        print(code)
+    elif sys.argv[1] == 'test':
+        if(sys.argv[2] != str(code_license)):
+            print(u"错误的激活码！")
+        else:
+            print(u'恭喜，激活成功！')
+    elif sys.argv[1] == str(code_license):
+        test = IECom()
+        try:
+            test.auto()
+        except Exception, e:
+            test.quit()
+            print 'err:', e
+            pass
+    else:
+        print(u'错误的激活码！')
+
 
 # def start_office_application(app_name):
 # 在这里获取到app后，其它的操作和通过VBA操作办公软件类似
@@ -202,32 +263,32 @@ except Exception, e:
 #     sleep(1)
 
 # 验证码是显式的，也是醉了，所以不需要OCR了
-    # self.document.getElementById('changeValidateImage').click()
-    # sleep(5)
-    # img_src = self.document.images[10].src
-    # print 'download images'
-    # img_data = urlopen(img_src)
-    # img_byte = img_data.read()
-    # img_file = open('temp.gif', 'wb')
-    # img_file.write(img_byte)
-    # img_file.close()
-    # img = Image.open('temp.gif')
-    # img = img.filter(ImageFilter.MedianFilter())
-    # enhancer = ImageEnhance.Contrast(img)
-    # img = enhancer.enhance(2)
-    # img = img.convert('1')
-    # img.crop((2, 2, 72, 30)).save("temp.bmp", dpi=(200, 200))
-    # remove('temp.gif')
-    # args = ['tesseract', 'temp.bmp', 'temp']
-    # print 'OCRing'
-    # proc = Popen(args)
-    # proc.wait()
-    # inf = file('temp.txt')
-    # text = inf.read()
-    # inf.close()
-    # remove('temp.txt')
-    # remove('temp.bmp')
-    # text_list = text.split(' ')
-    # for txt in text_list:
-    #     if len(txt) >= 4:
-    #         return txt[:4]
+# self.document.getElementById('changeValidateImage').click()
+# sleep(5)
+# img_src = self.document.images[10].src
+# print 'download images'
+# img_data = urlopen(img_src)
+# img_byte = img_data.read()
+# img_file = open('temp.gif', 'wb')
+# img_file.write(img_byte)
+# img_file.close()
+# img = Image.open('temp.gif')
+# img = img.filter(ImageFilter.MedianFilter())
+# enhancer = ImageEnhance.Contrast(img)
+# img = enhancer.enhance(2)
+# img = img.convert('1')
+# img.crop((2, 2, 72, 30)).save("temp.bmp", dpi=(200, 200))
+# remove('temp.gif')
+# args = ['tesseract', 'temp.bmp', 'temp']
+# print 'OCRing'
+# proc = Popen(args)
+# proc.wait()
+# inf = file('temp.txt')
+# text = inf.read()
+# inf.close()
+# remove('temp.txt')
+# remove('temp.bmp')
+# text_list = text.split(' ')
+# for txt in text_list:
+#     if len(txt) >= 4:
+#         return txt[:4]
