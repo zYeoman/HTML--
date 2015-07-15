@@ -10,7 +10,9 @@ from win32com.client import DispatchEx
 # from win32com.client import Dispatch
 from time import sleep
 from uuid import getnode
-import sys
+import os
+import Tkinter as tk
+import tkFileDialog
 
 
 class IECom():
@@ -18,7 +20,7 @@ class IECom():
     """open IE and use IE to auto lock bill"""
 
     url = 'http://ifeidai.com/EDaiWeb/AgentLoan/Login'
-    fast_url = 'http://ifeidai.com/EDaiWeb/AgentLogon/MySaleApplyBill?Length=10'
+    fast_ur = 'http://ifeidai.com/EDaiWeb/AgentLogon/MySaleApplyBill?Length=10'
     result_file = 'result.txt'
     usr_file = 'login.txt'
     city_name = [u'青岛', u'济南', u'唐山', u'无锡', u'上海', u'扬州',
@@ -36,7 +38,72 @@ class IECom():
         '''
         init open IE
         '''
-        self.open()
+        code = getnode()
+        self.code_license = code % 3721 + code * 9997 % 997
+        self.root = os.path.split(os.path.realpath(__file__))[0]
+        try:
+            lic = open(self.root + os.sep + 'lic')
+            line = lic.readline()
+            lic.close()
+        except:
+            line = u'请输入激活码'
+        self.main_window = tk.Tk()
+        self.main_window.minsize(300, 350)
+        self.main_window.title(u'锁单神器')
+        self.main_window.protocol('WM_DELETE_WINDOW', self.quit)
+        win = tk.Frame()
+        self.entry_var = tk.StringVar()
+        self.entry_var.set(line)
+        self.result_var = tk.StringVar()
+        self.result_var.set(u'信息文件路径：    ' + self.result_file)
+        self.mac_var = tk.StringVar()
+        self.mac_var.set(u'机器码:    ' + str(code))
+        self.usr_var = tk.StringVar()
+        self.usr_var.set(u'账户文件路径：    ' + self.usr_file)
+        win.pack()
+        label_mac = tk.Entry(win, textvariable=self.mac_var)
+        label_mac.pack(side=tk.TOP)
+        self.entry_en = tk.Entry(win, textvariable=self.entry_var)
+        self.entry_en.pack(side=tk.TOP)
+        label_result = tk.Label(win, textvariable=self.result_var)
+        label_result.pack(side=tk.TOP)
+        label_usr = tk.Label(win, textvariable=self.usr_var)
+        label_usr.pack(side=tk.TOP)
+        button_act = tk.Button(win, text=u'激活', command=self.act)
+        button_act.pack(side=tk.LEFT)
+        self.button_set_result = tk.Button(
+            win, text=u'打开信息文件', command=self.set_result, state=tk.DISABLED)
+        self.button_set_result.pack(side=tk.LEFT)
+        self.button_set_usr = tk.Button(
+            win, text=u'打开账户文件', command=self.set_info, state=tk.DISABLED)
+        self.button_set_usr.pack(side=tk.LEFT)
+        self.button_open = tk.Button(
+            win, text=u'打开IE', command=self.open, state=tk.DISABLED)
+        self.button_open.pack(side=tk.LEFT)
+        self.button_start = tk.Button(
+            win, text=u'开始锁单', command=self.auto, state=tk.DISABLED)
+        self.button_start.pack(side=tk.LEFT)
+
+        win.mainloop()
+
+    def act(self):
+        if str(self.code_license) == self.entry_en.get():
+            self.button_start['state'] = tk.NORMAL
+            self.button_set_usr['state'] = tk.NORMAL
+            self.button_set_result['state'] = tk.NORMAL
+            self.button_open['state'] = tk.NORMAL
+            lic = open(self.root + os.sep + 'lic', 'w')
+            lic.write(str(self.code_license))
+            lic.close()
+            self.entry_var.set(u'激活成功')
+
+    def set_result(self):
+        self.result_file = tkFileDialog.askopenfilename(initialdir='D:/')
+        self.result_var.set(u'信息文件路径：    ' + self.result_file)
+
+    def set_info(self):
+        self.usr_file = tkFileDialog.askopenfilename(initialdir='D:/')
+        self.usr_var.set(u'账户文件路径：    ' + self.usr_file)
 
     def open(self):
         '''
@@ -72,7 +139,7 @@ class IECom():
         if flag == 't':
             print(u'登陆成功！')
             sleep(2)
-            self.__ie.navigate(self.fast_url)
+            self.__ie.navigate(self.fast_ur)
             self.wait()
             self.document.getElementById('FastRecommend').click()
             print(u'开始快速推荐')
@@ -113,6 +180,7 @@ class IECom():
 
     def quit(self):
         print(u'退出')
+        self.main_window.destroy()
         self.__ie.quit()
 
     def auto(self):
@@ -210,27 +278,7 @@ class IECom():
     def set_node(self, node, val):
         node.innerHTML = val
 
-code = getnode()
-code_license = code % 3721 + code * 9997 % 997
-
-if len(sys.argv) > 1:
-    if sys.argv[1] == 'getnode':
-        print(code)
-    elif sys.argv[1] == 'test':
-        if(sys.argv[2] != str(code_license)):
-            print(u"错误的激活码！")
-        else:
-            print(u'恭喜，激活成功！')
-    elif sys.argv[1] == str(code_license):
-        test = IECom()
-        try:
-            test.auto()
-        except Exception, e:
-            test.quit()
-            print 'err:', e
-            pass
-    else:
-        print(u'错误的激活码！')
+test = IECom()
 
 
 # def start_office_application(app_name):
