@@ -14,6 +14,19 @@ import os
 import Tkinter as tk
 import tkFileDialog
 
+import sys
+# 获取脚本文件的当前路径
+
+
+def cur_file_dir():
+    # 获取脚本路径
+    path = sys.path[0]
+    # 判断为脚本文件还是py2exe编译后的文件，如果是脚本文件，则返回的是脚本的目录，如果是py2exe编译后的文件，则返回的是编译后的文件路径
+    if os.path.isdir(path):
+        return path
+    elif os.path.isfile(path):
+        return os.path.dirname(path)
+
 
 class IECom():
 
@@ -40,7 +53,7 @@ class IECom():
         '''
         code = getnode()
         self.code_license = code % 3721 + code * 9997 % 997
-        self.root = os.path.split(os.path.realpath(__file__))[0]
+        self.root = cur_file_dir()
         try:
             lic = open(self.root + os.sep + 'lic')
             line = lic.readline()
@@ -48,7 +61,7 @@ class IECom():
         except:
             line = u'请输入激活码'
         self.main_window = tk.Tk()
-        self.main_window.minsize(300, 350)
+        self.main_window.minsize(300, 300)
         self.main_window.title(u'锁单神器')
         self.main_window.protocol('WM_DELETE_WINDOW', self.quit)
         win = tk.Frame()
@@ -60,6 +73,18 @@ class IECom():
         self.mac_var.set(u'机器码:    ' + str(code))
         self.usr_var = tk.StringVar()
         self.usr_var.set(u'账户文件路径：    ' + self.usr_file)
+        self.info_str = u'''
+        锁单神器v7：自动将信息文件中的数据锁到账户文件中的账户中。
+        信息文件格式：姓名,身份证号,手机号,城市名
+        例如：张三,100000000000000000,11100000000,北京
+        账户文件格式：账户名,密码
+        例如：100000000000000000,a111111
+
+
+        Copyright (C) 2015 Yeoman Zhuang
+        '''
+        self.info_var = tk.StringVar()
+        self.info_var.set(self.info_str)
         win.pack()
         label_mac = tk.Entry(win, textvariable=self.mac_var)
         label_mac.pack(side=tk.TOP)
@@ -69,6 +94,8 @@ class IECom():
         label_result.pack(side=tk.TOP)
         label_usr = tk.Label(win, textvariable=self.usr_var)
         label_usr.pack(side=tk.TOP)
+        label_info = tk.Label(win, textvariable=self.info_var)
+        label_info.pack(side=tk.BOTTOM)
         button_act = tk.Button(win, text=u'激活', command=self.act)
         button_act.pack(side=tk.LEFT)
         self.button_set_result = tk.Button(
@@ -77,25 +104,31 @@ class IECom():
         self.button_set_usr = tk.Button(
             win, text=u'打开账户文件', command=self.set_info, state=tk.DISABLED)
         self.button_set_usr.pack(side=tk.LEFT)
-        self.button_open = tk.Button(
-            win, text=u'打开IE', command=self.open, state=tk.DISABLED)
-        self.button_open.pack(side=tk.LEFT)
+        # self.button_open = tk.Button(
+        # win, text=u'打开IE', command=self.open, state=tk.DISABLED)
+        # self.button_open.pack(side=tk.LEFT)
         self.button_start = tk.Button(
-            win, text=u'开始锁单', command=self.auto, state=tk.DISABLED)
+            win, text=u'开始锁单', command=self.open_auto, state=tk.DISABLED)
         self.button_start.pack(side=tk.LEFT)
 
         win.mainloop()
+
+    def open_auto(self):
+        self.open()
+        self.auto()
 
     def act(self):
         if str(self.code_license) == self.entry_en.get():
             self.button_start['state'] = tk.NORMAL
             self.button_set_usr['state'] = tk.NORMAL
             self.button_set_result['state'] = tk.NORMAL
-            self.button_open['state'] = tk.NORMAL
+            # self.button_open['state'] = tk.NORMAL
             lic = open(self.root + os.sep + 'lic', 'w')
             lic.write(str(self.code_license))
             lic.close()
             self.entry_var.set(u'激活成功')
+        else:
+            self.entry_var.set(u'激活失败，请重新输入')
 
     def set_result(self):
         self.result_file = tkFileDialog.askopenfilename(initialdir='D:/')
@@ -114,7 +147,7 @@ class IECom():
         self.usr = open(self.usr_file)
         print(u'绑定IE')
         self.__ie = DispatchEx('InternetExplorer.Application')
-        self.__ie.visible = 1
+        self.__ie.visible = 0
         self.__ie.navigate(self.url)
         self.wait()
         self.document = self.__ie.Document
@@ -236,12 +269,9 @@ class IECom():
                 tmp_button[0].click()
                 sleep(10)
                 tmp_button = tmp_doc.getElementsByTagName('button')
-                while tmp_button.length != 2:
-                    tmp_button = tmp_doc.getElementsByTagName('button')
                 tmp_button[0].click()
                 self.wait()
-                if tmp_doc.getElementsByTagName('button').length > 0:
-                    tmp_doc.getElementsByTagName('button')[0].click()
+                tmp_doc.getElementsByTagName('button')[0].click()
                 sleep(10)
                 while not tmp_doc.getElementById('btnContinuance'):
                     pass
