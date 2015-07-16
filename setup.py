@@ -1,3 +1,5 @@
 from distutils.core import setup
 import py2exe
-setup(console=['html.py'], options={"py2exe": {"includes": ["sip"]}})
+setup(console=['html.py'], version='7',
+      zipfile=None,
+      options={"py2exe": {"includes": ["sip"]}})
