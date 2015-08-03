@@ -8,6 +8,7 @@
 * 提取doc、pdf等多种格式文件中的信息
 * 自动锁单
 
+
 ## ChangeLog
 
 * version5:
@@ -44,3 +45,8 @@
 * 多次运行`result.txt`和`result.xls`是会被覆盖的，注意做好备份
 * `集合`内的文件是移动过去的，其他文件夹里的文件是复制过去的。
 * `html`文件应该是`名字[-*]18位身份证号.htm[l]`这种格式的
+
+## Reference
+[pdf2txt](http://www.unixuser.org/~euske/python/pdfminer/index.html#pdf2txt)
+[Write logFile](http://www.cnblogs.com/rrxc/p/4670331.html)
+[pdf库](http://www.open-open.com/lib/list/17)
