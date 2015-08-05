@@ -47,6 +47,8 @@
 * `html`文件应该是`名字[-*]18位身份证号.htm[l]`这种格式的
 
 ## Reference
-[pdf2txt](http://www.unixuser.org/~euske/python/pdfminer/index.html#pdf2txt)
-[Write logFile](http://www.cnblogs.com/rrxc/p/4670331.html)
-[pdf库](http://www.open-open.com/lib/list/17)
+* [pdf2txt](http://www.unixuser.org/~euske/python/pdfminer/index.html#pdf2txt)
+* [Write logFile](http://www.cnblogs.com/rrxc/p/4670331.html)
+* [pdf库](http://www.open-open.com/lib/list/17)
+* [使用C#或者EXCEL](http://blog.csdn.net/lufy_legend/article/details/25191765)
+* [使用pucurl进行web提交](http://blog.csdn.net/nwpulei/article/details/8581453) 以及 [aifeidai.js](./aifeidai.js)

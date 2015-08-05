@@ -147,7 +147,7 @@ class IECom():
         self.usr = open(self.usr_file)
         print(u'绑定IE')
         self.__ie = DispatchEx('InternetExplorer.Application')
-        self.__ie.visible = 0
+        self.__ie.visible = 1
         self.__ie.navigate(self.url)
         self.wait()
         self.document = self.__ie.Document
@@ -267,14 +267,13 @@ class IECom():
                 print(u'可提交贷款')
                 tmp_button = tmp_doc.getElementsByTagName('button')
                 tmp_button[0].click()
-                sleep(10)
+                sleep(1)
                 tmp_button = tmp_doc.getElementsByTagName('button')
                 tmp_button[0].click()
                 self.wait()
                 tmp_doc.getElementsByTagName('button')[0].click()
-                sleep(10)
-                while not tmp_doc.getElementById('btnContinuance'):
-                    pass
+                sleep(1)
+                self.wait()
                 tmp_doc.getElementById('btnContinuance').click()
                 self.wait()
                 return 0
