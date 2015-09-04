@@ -159,16 +159,16 @@ class IECom():
         print('Login:' + usr_name)
         self.__ie.navigate(self.url)
         self.wait()
-        self.reset_flag()
+        # self.reset_flag()
         print(u'输入账户密码')
-        self.document.getElementsByTagName('input')[0].value = usr_name
+        self.document.Body.getElementsByTagName('input')[0].value = usr_name
         self.document.getElementsByTagName('input')[1].value = usr_pwd
         while(self.identify() == ''):
             pass
         self.document.getElementsByTagName('input')[2].value = self.identify()
         self.document.getElementById('btnSave').click()
         self.wait()
-        flag = self.get_flag()
+        flag = 't'
         if flag == 't':
             print(u'登陆成功！')
             sleep(2)
@@ -188,11 +188,11 @@ class IECom():
         print(u'获得验证码')
         return self.document.getElementById('ValidateValue').value
 
-    def reset_flag(self):
-        flag = self.document.getElementById(
-            'DataNotFound').getElementsByTagName('p')
-        if flag.length > 0:
-            flag[0].innerHTML = 't'
+    # def reset_flag(self):
+    #     flag = self.document.getElementById(
+    #         'DataNotFound').getElementsByTagName('p')
+    #     if flag.length > 0:
+    #         flag[0].innerHTML = 't'
 
     def get_flag(self):
         flag = self.document.getElementById(
@@ -209,6 +209,10 @@ class IECom():
     def wait(self):
         print(u'等待中')
         while self.__ie.Busy or self.__ie.ReadyState != 4:
+            sleep(1)
+
+    def nwait(self):
+        while not self.__ie.Busy or self.__ie.ReadyState == 4:
             sleep(1)
 
     def quit(self):
@@ -229,8 +233,8 @@ class IECom():
                 info_name, info_id, info_phone, info_city = line.split(',')
                 info_name = info_name.decode('gbk')
                 info_city = info_city[:-1].decode('gbk')
-                # if info_city in self.city_name:
-                if True:
+                if info_city in self.city_name:
+                    # if True:
                     if self.input(info_name, info_id, info_phone):
                         result_info.append(line)
                         break
@@ -254,8 +258,8 @@ class IECom():
         tmp_doc.getElementById('txtMobile').value = info_phone
         tmp_doc.getElementById('txtCustomerName').value = info_name
         tmp_doc.getElementById('btnAdd').click()
+        sleep(2)
         self.wait()
-        sleep(1)
         tmp = tmp_doc.getElementById(
             'DataNotFound').getElementsByTagName('p')
         while tmp.length == 0:
@@ -270,9 +274,7 @@ class IECom():
                 sleep(1)
                 tmp_button = tmp_doc.getElementsByTagName('button')
                 tmp_button[0].click()
-                self.wait()
-                tmp_doc.getElementsByTagName('button')[0].click()
-                sleep(1)
+                sleep(2)
                 self.wait()
                 tmp_doc.getElementById('btnContinuance').click()
                 self.wait()
@@ -281,8 +283,8 @@ class IECom():
                 print(u'推荐数量达到上限')
                 return 1
         tmp_button = tmp_doc.getElementsByTagName('button')
-        while tmp_button.length == 0:
-            tmp_button = tmp_doc.getElementsByTagName('button')
+        # while tmp_button.length == 0:
+        # tmp_button = tmp_doc.getElementsByTagName('button')
         tmp_button[0].click()
         return 0
 

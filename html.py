@@ -201,10 +201,10 @@ class HTML():
                 phone = ''
                 if len(lines) > 394:
                     if flag == 0:
-                        m = re.search(r'>1\d{10}<', lines[245])
+                        m = re.search(r'>0?1(3|4|5|6|7|8)\d{9}<', lines[245])
                         if m:
                             flag = 1
-                            phone = m.group(0)[1:-1]
+                            phone = m.group(0)[-12:-1]
                     if flag == 1:
                         for line in lines[270], lines[273], lines[378], lines[393]:
                             for c in city_name:
@@ -216,10 +216,11 @@ class HTML():
                                 break
                     if flag != 2:
                         for line in lines:
-                            m = re.search(r'>1\d{10}<', line)
                             if m:
                                 flag = 1
-                                phone = m.group(0)[1:-1]
+                                phone = m.group(0)[-12:-1]
+                            else:
+                                m = re.search(r'>0?1(3|4|5|6|7|8)\d{9}<', line)
                             if flag == 1:
                                 for c in city_name:
                                     if c in line:
