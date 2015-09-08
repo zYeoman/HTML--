@@ -161,13 +161,22 @@ class IECom():
         self.wait()
         # self.reset_flag()
         print(u'输入账户密码')
-        self.document.Body.getElementsByTagName('input')[0].value = usr_name
-        self.document.getElementsByTagName('input')[1].value = usr_pwd
-        while(self.identify() == ''):
-            pass
-        self.document.getElementsByTagName('input')[2].value = self.identify()
-        self.document.getElementById('btnSave').click()
-        self.wait()
+        while True:
+            try:
+                self.document.Body.getElementsByTagName(
+                    'input')[0].value = usr_name
+                self.document.getElementsByTagName('input')[1].value = usr_pwd
+                while(self.identify() == ''):
+                    pass
+                self.document.getElementsByTagName(
+                    'input')[2].value = self.identify()
+                self.document.getElementById('btnSave').click()
+                self.wait()
+                break
+            except:
+                self.__ie.refresh()
+                sleep(4)
+                self.wait()
         flag = 't'
         if flag == 't':
             print(u'登陆成功！')
