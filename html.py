@@ -237,7 +237,18 @@ class HTML():
                             result.write(Id.group(0) + ",")
                             xlsResultSheet.write(findNum, 1, Id.group(0))
                         else:
-                            result.write(",")
+                            IId = re.search(r'>\d{17}[\dX]<', lines[160])
+                            if IId:
+                                pass
+                            else:
+                                for line in lines:
+                                    IId = re.search(r'>\d{17}[\dX]<', line)
+                                    if IId:
+                                        break
+                            if IId:
+                                result.write(IId.group(0)[1:-1] + ",")
+                            else:
+                                result.write(",")
                         result.write(phone + ",")
                         result.write(city + "\n")
                         xlsResultSheet.write(
